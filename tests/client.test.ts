@@ -68,6 +68,51 @@ describe("SequenceClient", () => {
     expect(err.status).toBe(401);
   });
 
+  it("throws SequenceApiError(kind=pagination_cap) when listAllAccounts hits maxPages", async () => {
+    fetchMock.mockImplementation(async () =>
+      okResponse({
+        items: [{ id: "a" }, { id: "b" }],
+        pagination: { page: 1, pageSize: 2 },
+      }),
+    );
+    const err = await client.listAllAccounts({ pageSize: 2, maxPages: 2 }).catch((e) => e);
+    expect(err).toBeInstanceOf(SequenceApiError);
+    expect((err as SequenceApiError).kind).toBe("pagination_cap");
+    expect((err as Error).message).toMatch(/pagination cap reached after 2 pages/);
+  });
+
+  it("throws SequenceApiError(kind=timeout) when fetch aborts", async () => {
+    fetchMock.mockImplementation((_url: string, init: RequestInit) => {
+      return new Promise((_resolve, reject) => {
+        const signal = init.signal as AbortSignal;
+        signal.addEventListener("abort", () => {
+          const abortErr = new Error("aborted");
+          abortErr.name = "AbortError";
+          reject(abortErr);
+        });
+      });
+    });
+
+    const fastClient = new SequenceClient({ baseUrl, token: "test-token", timeoutMs: 10 });
+    const err = await fastClient.getAccount("acc-1").catch((e) => e);
+    expect(err).toBeInstanceOf(SequenceApiError);
+    expect((err as SequenceApiError).kind).toBe("timeout");
+    expect((err as SequenceApiError).status).toBe(0);
+    expect((err as Error).message).toMatch(/timed out after 10ms/);
+    expect((err as SequenceApiError).cause).toBeInstanceOf(Error);
+  });
+
+
+  it("throws SequenceApiError(kind=network) when fetch rejects with a non-Abort error", async () => {
+    const networkErr = new TypeError("fetch failed");
+    fetchMock.mockRejectedValue(networkErr);
+    const err = await client.getAccount("acc-1").catch((e) => e);
+    expect(err).toBeInstanceOf(SequenceApiError);
+    expect((err as SequenceApiError).kind).toBe("network");
+    expect((err as SequenceApiError).status).toBe(0);
+    expect((err as SequenceApiError).cause).toBe(networkErr);
+  });
+
   it("paginates listAllAccounts until short page", async () => {
     fetchMock
       .mockResolvedValueOnce(
@@ -83,7 +128,7 @@ describe("SequenceClient", () => {
         }),
       );
 
-    const all = await client.listAllAccounts(50);
+    const all = await client.listAllAccounts({ pageSize: 50 });
     expect(all).toHaveLength(52);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });

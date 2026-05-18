@@ -9,9 +9,12 @@ export interface AppConfig {
   logLevel: string;
 }
 
+
+export const DEFAULT_API_BASE_URL = "https://api.getsequence.io/platform/v1";
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
-  const apiToken = required(env, "SEQUENCE_API_TOKEN");
-  const apiBaseUrl = env.SEQUENCE_API_BASE_URL ?? "https://api.getsequence.io/platform/v1";
+  const apiToken = requireEnv(env, "SEQUENCE_API_TOKEN");
+  const apiBaseUrl = env.SEQUENCE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
   const host = env.HOST ?? "0.0.0.0";
   const port = parseIntEnv(env, "PORT", 9464);
   const scrapeIntervalSeconds = parseIntEnv(env, "SCRAPE_INTERVAL_SECONDS", 60);
@@ -38,7 +41,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   };
 }
 
-function required(env: NodeJS.ProcessEnv, key: string): string {
+function requireEnv(env: NodeJS.ProcessEnv, key: string): string {
   const value = env[key];
   if (!value) {
     throw new Error(`Missing required environment variable: ${key}`);

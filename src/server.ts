@@ -1,8 +1,8 @@
 import Fastify, { type FastifyInstance } from "fastify";
-import type { MetricsBundle } from "./metrics/registry.js";
+import type { Registry } from "prom-client";
 
 export interface ServerOptions {
-  metrics: MetricsBundle;
+  registry: Registry;
   logLevel: string;
 }
 
@@ -15,8 +15,8 @@ export function createServer(opts: ServerOptions): FastifyInstance {
   app.get("/healthz", async () => ({ status: "ok" }));
 
   app.get("/metrics", async (_req, reply) => {
-    const body = await opts.metrics.registry.metrics();
-    reply.header("Content-Type", opts.metrics.registry.contentType);
+    const body = await opts.registry.metrics();
+    reply.header("Content-Type", opts.registry.contentType);
     return body;
   });
 

@@ -13,7 +13,21 @@ export interface PaginatedData<T> {
   pagination: Pagination;
 }
 
-export type AccountType = string;
+export type AccountType =
+  | "BANK"
+  | "BROKERAGE"
+  | "CRYPTO_EXCHANGE"
+  | "CASH"
+  | "LOAN"
+  | "CREDIT_CARD"
+  | "PROPERTY"
+  | "VEHICLE"
+  | "OTHER_ASSET"
+  | "OTHER_LIABILITY"
+  | "EXTERNAL_ACCOUNT"
+  | "POD"
+  // open fallback so unknown server values still type-check, while known values autocomplete
+  | (string & {});
 
 export interface AccountSummary {
   id: string;
@@ -52,9 +66,18 @@ export interface TransferAccountRef {
   isDeleted: boolean;
 }
 
-export type TransferStatus = string;
-export type TransferDirection = string;
-export type TransferOrigin = string;
+export type TransferStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "COMPLETE"
+  | "FAILED"
+  | "CANCELED"
+  | "RETURNED"
+  | (string & {});
+
+export type TransferDirection = "MONEY_IN" | "MONEY_OUT" | (string & {});
+
+export type TransferOrigin = "RULE" | "MANUAL" | "AUTO" | "INSTANT" | "API" | (string & {});
 
 export interface Transfer {
   id: string;

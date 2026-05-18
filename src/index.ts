@@ -1,13 +1,34 @@
-import { loadConfig } from "./config.js";
-import { SequenceCollector } from "./metrics/collector.js";
+import { fileURLToPath } from "node:url";
+import type { FastifyInstance } from "fastify";
+import { type AppConfig, loadConfig } from "./config.js";
 import { createMetrics } from "./metrics/registry.js";
+import { SequenceCollector } from "./scrape/collector.js";
 import { SequenceClient } from "./sequence/client.js";
 import { createServer } from "./server.js";
+import { createShutdown } from "./shutdown.js";
 
-async function main(): Promise<void> {
-  const config = loadConfig();
+export interface BootstrapDeps {
+  loadConfig?: () => AppConfig;
+  onSignal?: (signal: NodeJS.Signals, listener: () => void) => void;
+}
+
+export interface BootstrapHandle {
+  app: FastifyInstance;
+  collector: SequenceCollector;
+  shutdown: (signal: string) => Promise<void>;
+}
+
+export async function bootstrap(deps: BootstrapDeps = {}): Promise<BootstrapHandle> {
+  const loadCfg = deps.loadConfig ?? loadConfig;
+  const onSignal =
+    deps.onSignal ??
+    ((signal: NodeJS.Signals, listener: () => void) => {
+      process.on(signal, listener);
+    });
+
+  const config = loadCfg();
   const metrics = createMetrics();
-  const app = createServer({ metrics, logLevel: config.logLevel });
+  const app = createServer({ registry: metrics.registry, logLevel: config.logLevel });
 
   const client = new SequenceClient({
     baseUrl: config.apiBaseUrl,
@@ -24,30 +45,27 @@ async function main(): Promise<void> {
     transfersPageSize: config.transfersPageSize,
   });
 
-  collector.start();
+  collector.schedule();
   await app.listen({ host: config.host, port: config.port });
   app.log.info(
     { host: config.host, port: config.port, intervalMs: config.scrapeIntervalMs },
     "sequence-exporter listening",
   );
 
-  const shutdown = async (signal: string): Promise<void> => {
-    app.log.info({ signal }, "shutting down");
-    try {
-      await collector.stop();
-      await app.close();
-      process.exit(0);
-    } catch (err) {
-      app.log.error({ err }, "shutdown failed");
-      process.exit(1);
-    }
-  };
+  const shutdown = createShutdown({ app, collector });
+  onSignal("SIGINT", () => void shutdown("SIGINT"));
+  onSignal("SIGTERM", () => void shutdown("SIGTERM"));
 
-  process.on("SIGINT", () => void shutdown("SIGINT"));
-  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+  return { app, collector, shutdown };
 }
 
-main().catch((err) => {
-  console.error("Fatal:", err);
-  process.exit(1);
-});
+async function main(): Promise<void> {
+  await bootstrap();
+}
+
+if (process.argv[1] && process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error("Fatal:", err);
+    process.exit(1);
+  });
+}
