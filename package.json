@@ -1,6 +1,6 @@
 {
   "name": "sequence-exporter",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "Prometheus exporter for Sequence (getsequence.io) account balances, transfers, and net worth",
   "type": "module",
   "private": true,
