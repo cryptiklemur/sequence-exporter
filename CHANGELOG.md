@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/cryptiklemur/sequence-exporter/compare/v1.0.0...v1.1.0) (2026-05-18)
+
+
+### Features
+
+* expose bootstrap helper and harden Sequence client errors ([759654f](https://github.com/cryptiklemur/sequence-exporter/commit/759654ffcdfb39f3ad5eaeb228430dd3b4c3421d))
+
 # 1.0.0 (2026-05-18)
 
 
