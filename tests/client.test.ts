@@ -102,7 +102,6 @@ describe("SequenceClient", () => {
     expect((err as SequenceApiError).cause).toBeInstanceOf(Error);
   });
 
-
   it("throws SequenceApiError(kind=network) when fetch rejects with a non-Abort error", async () => {
     const networkErr = new TypeError("fetch failed");
     fetchMock.mockRejectedValue(networkErr);

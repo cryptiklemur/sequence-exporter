@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { bootstrap, type BootstrapHandle } from "../src/index.js";
+import { type BootstrapHandle, bootstrap } from "../src/index.js";
 
 const baseConfig = {
   apiToken: "test-token",

@@ -9,7 +9,6 @@ export interface AppConfig {
   logLevel: string;
 }
 
-
 export const DEFAULT_API_BASE_URL = "https://api.getsequence.io/platform/v1";
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {

@@ -171,11 +171,11 @@ export class SequenceClient {
         );
       }
       const message = err instanceof Error ? err.message : String(err);
-      throw new SequenceApiError(
-        `Sequence API request to ${path} failed: ${message}`,
-        0,
-        { endpoint: path, kind: "network", cause: err },
-      );
+      throw new SequenceApiError(`Sequence API request to ${path} failed: ${message}`, 0, {
+        endpoint: path,
+        kind: "network",
+        cause: err,
+      });
     } finally {
       clearTimeout(timer);
     }

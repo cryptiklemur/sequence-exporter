@@ -278,7 +278,10 @@ export class SequenceCollector {
     if (!state.newestTransfer) return;
     const { metrics } = this.opts;
     this.lastTransferTs.set(summary.id, state.newest);
-    metrics.transferLastTimestampSeconds.set(this.transferAccountLabels(summary), state.newest / 1000);
+    metrics.transferLastTimestampSeconds.set(
+      this.transferAccountLabels(summary),
+      state.newest / 1000,
+    );
     metrics.transferLastAmountCents.set(
       this.transferLabels(summary, state.newestTransfer),
       state.newestTransfer.amountInCents,
@@ -324,7 +327,6 @@ export class SequenceCollector {
       direction: transfer.direction,
     };
   }
-
 
   private transferAccountLabels(summary: AccountSummary): TransferAccountLabels {
     return {

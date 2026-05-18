@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMetrics } from "../src/metrics/registry.js";
-import { SequenceCollector, type ScrapeLogger } from "../src/scrape/collector.js";
+import { type ScrapeLogger, SequenceCollector } from "../src/scrape/collector.js";
 import type { SequenceClient } from "../src/sequence/client.js";
 import type { Account, AccountSummary, PaginatedData, Transfer } from "../src/sequence/types.js";
 
