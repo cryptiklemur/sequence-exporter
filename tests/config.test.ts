@@ -45,14 +45,14 @@ describe("loadConfig", () => {
   });
 
   it("rejects too-small scrape interval", () => {
-    expect(() =>
-      loadConfig({ SEQUENCE_API_TOKEN: "abc", SCRAPE_INTERVAL_SECONDS: "1" }),
-    ).toThrow(/SCRAPE_INTERVAL_SECONDS/);
+    expect(() => loadConfig({ SEQUENCE_API_TOKEN: "abc", SCRAPE_INTERVAL_SECONDS: "1" })).toThrow(
+      /SCRAPE_INTERVAL_SECONDS/,
+    );
   });
 
   it("rejects too-small scrape timeout", () => {
-    expect(() =>
-      loadConfig({ SEQUENCE_API_TOKEN: "abc", SCRAPE_TIMEOUT_SECONDS: "0" }),
-    ).toThrow(/SCRAPE_TIMEOUT_SECONDS/);
+    expect(() => loadConfig({ SEQUENCE_API_TOKEN: "abc", SCRAPE_TIMEOUT_SECONDS: "0" })).toThrow(
+      /SCRAPE_TIMEOUT_SECONDS/,
+    );
   });
 });

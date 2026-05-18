@@ -39,7 +39,11 @@ function paginated<T>(items: T[]): PaginatedData<T> {
 
 describe("SequenceCollector", () => {
   let metrics: ReturnType<typeof createMetrics>;
-  let client: { listAllAccounts: ReturnType<typeof vi.fn>; getAccount: ReturnType<typeof vi.fn>; listAccountTransfers: ReturnType<typeof vi.fn> };
+  let client: {
+    listAllAccounts: ReturnType<typeof vi.fn>;
+    getAccount: ReturnType<typeof vi.fn>;
+    listAccountTransfers: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     metrics = createMetrics();
@@ -111,7 +115,9 @@ describe("SequenceCollector", () => {
 
     const errors = await metrics.registry.getSingleMetricAsString("sequence_scrape_errors_total");
     expect(errors).toContain('phase="balance_error"');
-    const balance = await metrics.registry.getSingleMetricAsString("sequence_account_balance_cents");
+    const balance = await metrics.registry.getSingleMetricAsString(
+      "sequence_account_balance_cents",
+    );
     expect(balance).not.toContain('account_id="partial"');
   });
 
@@ -151,7 +157,9 @@ describe("SequenceCollector", () => {
 
     // run again with same data on the same collector - watermark should suppress duplicates
     await runScrape(collector);
-    const seenAgain = await metrics.registry.getSingleMetricAsString("sequence_transfers_seen_total");
+    const seenAgain = await metrics.registry.getSingleMetricAsString(
+      "sequence_transfers_seen_total",
+    );
     expect(seenAgain).toMatch(/sequence_transfers_seen_total\{[^}]*account_id="acc"[^}]*\} 2/);
   });
 });

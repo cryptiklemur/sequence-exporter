@@ -1,10 +1,4 @@
-import type {
-  Account,
-  AccountSummary,
-  ApiEnvelope,
-  PaginatedData,
-  Transfer,
-} from "./types.js";
+import type { Account, AccountSummary, ApiEnvelope, PaginatedData, Transfer } from "./types.js";
 
 export interface SequenceClientOptions {
   baseUrl: string;
@@ -122,7 +116,12 @@ export class SequenceClient {
         );
       }
       const message = err instanceof Error ? err.message : String(err);
-      throw new SequenceApiError(`Sequence API request to ${path} failed: ${message}`, 0, undefined, path);
+      throw new SequenceApiError(
+        `Sequence API request to ${path} failed: ${message}`,
+        0,
+        undefined,
+        path,
+      );
     } finally {
       clearTimeout(timer);
     }

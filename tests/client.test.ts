@@ -24,21 +24,27 @@ describe("SequenceClient", () => {
   }
 
   it("sends Authorization: Bearer header", async () => {
-    fetchMock.mockResolvedValueOnce(okResponse({ items: [], pagination: { page: 1, pageSize: 50 } }));
+    fetchMock.mockResolvedValueOnce(
+      okResponse({ items: [], pagination: { page: 1, pageSize: 50 } }),
+    );
     await client.listAccounts();
     const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
     expect((init.headers as Record<string, string>).Authorization).toBe("Bearer test-token");
   });
 
   it("sends x-called-reason header", async () => {
-    fetchMock.mockResolvedValueOnce(okResponse({ items: [], pagination: { page: 1, pageSize: 50 } }));
+    fetchMock.mockResolvedValueOnce(
+      okResponse({ items: [], pagination: { page: 1, pageSize: 50 } }),
+    );
     await client.listAccounts();
     const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
     expect((init.headers as Record<string, string>)["x-called-reason"]).toMatch(/Prometheus/);
   });
 
   it("constructs paginated account URL with query params", async () => {
-    fetchMock.mockResolvedValueOnce(okResponse({ items: [], pagination: { page: 2, pageSize: 25 } }));
+    fetchMock.mockResolvedValueOnce(
+      okResponse({ items: [], pagination: { page: 2, pageSize: 25 } }),
+    );
     await client.listAccounts({ page: 2, pageSize: 25, type: "POD" });
     const url = fetchMock.mock.calls[0]?.[0] as string;
     expect(url).toContain(`${baseUrl}/accounts?`);
