@@ -152,11 +152,18 @@ export class SequenceCollector {
   }
 
   private accumulateAccountTotals(account: Account, totals: NetWorthTotals): void {
+    if (account.type === "INCOME_SOURCE") return;
     const balanceCents = account.balance?.balanceInCents ?? null;
     if (balanceCents == null) return;
-    totals.netWorth += balanceCents;
-    if (balanceCents >= 0) totals.totalAssets += balanceCents;
-    else totals.totalLiabilities += Math.abs(balanceCents);
+    if (account.externalAccountType === "LIABILITY") {
+      totals.netWorth -= balanceCents;
+      if (balanceCents >= 0) totals.totalLiabilities += balanceCents;
+      else totals.totalAssets += -balanceCents;
+    } else {
+      totals.netWorth += balanceCents;
+      if (balanceCents >= 0) totals.totalAssets += balanceCents;
+      else totals.totalLiabilities += -balanceCents;
+    }
   }
 
   private aggregateAccountCounts(summaries: AccountSummary[]): void {

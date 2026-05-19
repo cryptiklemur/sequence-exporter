@@ -81,6 +81,84 @@ describe("SequenceCollector", () => {
     expect(liabilities).toContain("25000");
   });
 
+  it("classifies externalAccountType=LIABILITY balances as liabilities, not assets", async () => {
+    client.listAllAccounts.mockResolvedValue([
+      makeSummary({ id: "checking", type: "EXTERNAL_ACCOUNT", externalAccountType: "DEPOSITORY" }),
+      makeSummary({ id: "amex", type: "EXTERNAL_ACCOUNT", externalAccountType: "LIABILITY" }),
+    ]);
+    client.getAccount.mockImplementation(async (id: string): Promise<Account> => {
+      if (id === "checking") {
+        return {
+          ...makeSummary({ id, type: "EXTERNAL_ACCOUNT", externalAccountType: "DEPOSITORY" }),
+          balance: { balanceInCents: 200_000 },
+        };
+      }
+      return {
+        ...makeSummary({ id, type: "EXTERNAL_ACCOUNT", externalAccountType: "LIABILITY" }),
+        balance: { balanceInCents: 50_000 },
+      };
+    });
+    client.listAccountTransfers.mockResolvedValue(paginated<Transfer>([]));
+
+    await runScrape();
+
+    const netWorth = await metrics.registry.getSingleMetricAsString("sequence_net_worth_cents");
+    const assets = await metrics.registry.getSingleMetricAsString("sequence_total_assets_cents");
+    const liabilities = await metrics.registry.getSingleMetricAsString(
+      "sequence_total_liabilities_cents",
+    );
+    expect(netWorth).toContain("150000");
+    expect(assets).toContain("200000");
+    expect(liabilities).toContain("50000");
+  });
+
+  it("counts a negative balance on a LIABILITY account (card credit) as an asset", async () => {
+    client.listAllAccounts.mockResolvedValue([
+      makeSummary({ id: "amex", type: "EXTERNAL_ACCOUNT", externalAccountType: "LIABILITY" }),
+    ]);
+    client.getAccount.mockResolvedValue({
+      ...makeSummary({ id: "amex", type: "EXTERNAL_ACCOUNT", externalAccountType: "LIABILITY" }),
+      balance: { balanceInCents: -1_000 },
+    });
+    client.listAccountTransfers.mockResolvedValue(paginated<Transfer>([]));
+
+    await runScrape();
+
+    const netWorth = await metrics.registry.getSingleMetricAsString("sequence_net_worth_cents");
+    const assets = await metrics.registry.getSingleMetricAsString("sequence_total_assets_cents");
+    const liabilities = await metrics.registry.getSingleMetricAsString(
+      "sequence_total_liabilities_cents",
+    );
+    expect(netWorth).toContain("1000");
+    expect(assets).toContain("1000");
+    expect(liabilities).toContain("0");
+  });
+
+  it("excludes INCOME_SOURCE accounts from net worth / assets / liabilities", async () => {
+    client.listAllAccounts.mockResolvedValue([
+      makeSummary({ id: "pod", type: "POD" }),
+      makeSummary({ id: "income", type: "INCOME_SOURCE" }),
+    ]);
+    client.getAccount.mockImplementation(async (id: string): Promise<Account> => {
+      if (id === "pod") {
+        return { ...makeSummary({ id, type: "POD" }), balance: { balanceInCents: 10_000 } };
+      }
+      return {
+        ...makeSummary({ id, type: "INCOME_SOURCE" }),
+        balance: { balanceInCents: 9_937 },
+      };
+    });
+    client.listAccountTransfers.mockResolvedValue(paginated<Transfer>([]));
+
+    await runScrape();
+
+    const netWorth = await metrics.registry.getSingleMetricAsString("sequence_net_worth_cents");
+    const assets = await metrics.registry.getSingleMetricAsString("sequence_total_assets_cents");
+    expect(netWorth).toContain("10000");
+    expect(assets).toContain("10000");
+    expect(netWorth).not.toContain("19937");
+  });
+
   it("skips accounts with null balance without throwing", async () => {
     client.listAllAccounts.mockResolvedValue([makeSummary({ id: "broken" })]);
     client.getAccount.mockResolvedValue({ ...makeSummary({ id: "broken" }), balance: null });
