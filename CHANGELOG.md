@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/cryptiklemur/sequence-exporter/compare/v1.1.0...v1.1.1) (2026-05-19)
+
+
+### Bug Fixes
+
+* **scrape:** classify external-account liabilities and exclude income sources ([d1a0812](https://github.com/cryptiklemur/sequence-exporter/commit/d1a0812a4ad55b74a96d7f7680465b5ec68b3a04))
+
 # [1.1.0](https://github.com/cryptiklemur/sequence-exporter/compare/v1.0.0...v1.1.0) (2026-05-18)
 
 
