@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/cryptiklemur/sequence-exporter/compare/v1.1.2...v1.1.3) (2026-05-19)
+
+
+### Bug Fixes
+
+* **docker:** use numeric UID/GID for COPY --link --chown ([a22175c](https://github.com/cryptiklemur/sequence-exporter/commit/a22175c2534daaac95c4eca34a94644543c71d9f))
+
 ## [1.1.2](https://github.com/cryptiklemur/sequence-exporter/compare/v1.1.1...v1.1.2) (2026-05-19)
 
 
