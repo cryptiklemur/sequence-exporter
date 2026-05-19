@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/cryptiklemur/sequence-exporter/compare/v1.1.1...v1.1.2) (2026-05-19)
+
+
+### Bug Fixes
+
+* **ci:** re-cut release so v1.1.1's container image is published ([25c3940](https://github.com/cryptiklemur/sequence-exporter/commit/25c39401c925438076b176190265847bb7d930aa))
+
 ## [1.1.1](https://github.com/cryptiklemur/sequence-exporter/compare/v1.1.0...v1.1.1) (2026-05-19)
 
 
