@@ -22,9 +22,9 @@ ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=9464
 RUN addgroup -g 1001 -S sequence && adduser -S sequence -u 1001 -G sequence
-COPY --link --from=prod-deps --chown=sequence:sequence /app/node_modules ./node_modules
-COPY --link --from=build --chown=sequence:sequence /app/dist ./dist
-COPY --link --chown=sequence:sequence package.json ./
+COPY --link --from=prod-deps --chown=1001:1001 /app/node_modules ./node_modules
+COPY --link --from=build --chown=1001:1001 /app/dist ./dist
+COPY --link --chown=1001:1001 package.json ./
 USER sequence
 EXPOSE 9464
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
